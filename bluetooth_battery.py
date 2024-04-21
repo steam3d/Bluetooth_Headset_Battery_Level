@@ -225,8 +225,12 @@ class BatteryStateQuerier:
                     if group == 3 and code == 3:
                         # Example: https://github.com/google/nearby/blob/main/fastpair/common/battery_notification.cc
                         def parse_level(level: int) -> int:
-                            # 0xff means not present/unknown
-                            if level == 0xff:
+                            #   01234567 bits order
+                            # 0x11111111 charging, but not present/unknown battery level charging
+                            # 0x01111111 not charging, but not present/unknown battery level
+                            # 0 bit:    1 charging, 0 not charging
+                            # 1-7 bits: battery level 
+                            if (level & 0x7f) == 0x7f:
                                 return None
                             # Top bit indicates if the device is charging
                             return level & 0x7f
